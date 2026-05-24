@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base Line Store – Tienda K-pop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink: #fc9db5;
+      --light: #feedf2;
+      --deep: #f472a0;
+      --text: #5a2d42;
+      --muted: #c47090;
+      --white: #ffffff;
+      --shadow: rgba(252,157,181,0.3);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: #ffffff; color: var(--text); min-height: 100vh; }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--white);
+      border-bottom: 2px solid var(--pink);
+      padding: 14px 16px 0;
+      text-align: center;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 20px var(--shadow);
+    }
+    .header-title-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0; padding-bottom: 6px;
+    }
+    .store-name {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.4rem, 4.5vw, 2rem);
+      color: var(--deep);
+      letter-spacing: 1px;
+      line-height: 1.1;
+    }
+    .store-kpop {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+      font-size: clamp(.72rem, 1.8vw, .82rem);
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .store-sub { display: none; }
+    nav {
+      display: flex; justify-content: center; gap: 0;
+      border-top: 1px solid #fde2ec;
+    }
+    nav button {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .85rem;
+      color: var(--muted); padding: 10px 20px; letter-spacing: .5px;
+      border-bottom: 3px solid transparent; transition: all .2s;
+      text-transform: uppercase;
+    }
+    nav button.active, nav button:hover { color: var(--deep); border-bottom-color: var(--deep); }
+
+    /* ── CART BUBBLE ── */
+    .cart-btn {
+      position: fixed; bottom: 22px; right: 22px; z-index: 200;
+      background: var(--deep); color: white; border: none; cursor: pointer;
+      border-radius: 50%; width: 56px; height: 56px; font-size: 1.4rem;
+      box-shadow: 0 4px 18px var(--shadow); display: flex; align-items: center; justify-content: center;
+      transition: transform .2s;
+    }
+    .cart-btn:hover { transform: scale(1.1); }
+    .cart-count {
+      position: absolute; top: 4px; right: 4px;
+      background: white; color: var(--deep); font-size: .7rem; font-weight: 800;
+      border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── PAGES ── */
+    .page { display: none; max-width: 960px; margin: 0 auto; padding: 28px 16px 120px; }
+    .page.active { display: block; }
+
+    /* ── CATALOG ── */
+    .section-title {
+      font-family: 'Nunito', sans-serif; font-size: 1.4rem;
+      color: var(--deep); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+    }
+    .products-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;
+    }
+    .product-card {
+      background: white; border-radius: 16px; overflow: hidden;
+      box-shadow: 0 2px 12px var(--shadow); cursor: pointer;
+      transition: transform .2s, box-shadow .2s; border: 1.5px solid #fce4ee;
+    }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px var(--shadow); }
+    .product-img {
+      width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--light);
+      display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
+    }
+    .product-img img { width: 100%; height: 100%; object-fit: cover; }
+    .product-info { padding: 12px 14px 14px; }
+    .product-artist { font-size: .72rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+    .product-name { font-weight: 700; font-size: .95rem; color: var(--text); margin: 2px 0 6px; }
+    .product-price { color: var(--deep); font-weight: 800; font-size: 1rem; }
+    .presale-badge {
+      display: inline-block; background: var(--pink); color: white;
+      font-size: .65rem; font-weight: 800; padding: 2px 7px; border-radius: 20px;
+      margin-left: 6px; vertical-align: middle; letter-spacing: .3px;
+    }
+    .add-cart-btn {
+      width: 100%; margin-top: 10px; padding: 8px; border: none; cursor: pointer;
+      background: var(--pink); color: white; border-radius: 8px; font-weight: 700;
+      font-family: 'Nunito', sans-serif; font-size: .85rem; transition: background .2s;
+    }
+    .add-cart-btn:hover { background: var(--deep); }
+
+    /* ── PRODUCT DETAIL ── */
+    #page-detail { display: none; }
+    #page-detail.active { display: block; }
+    .back-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--deep); font-weight: 700; font-size: .9rem;
+      display: flex; align-items: center; gap: 4px; margin-bottom: 20px;
+    }
+    .detail-layout { display: flex; gap: 28px; flex-wrap: wrap; }
+    .detail-img {
+      width: 260px; min-width: 200px; aspect-ratio: 1; border-radius: 16px;
+      background: var(--light); display: flex; align-items: center; justify-content: center;
+      font-size: 5rem; overflow: hidden; flex-shrink: 0;
+      border: 2px solid var(--pink);
+    }
+    .detail-img img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-info { flex: 1; min-width: 220px; }
+    .detail-info h2 { font-family: 'Nunito', sans-serif; font-size: 1.5rem; color: var(--deep); margin-bottom: 4px; }
+    .detail-meta { color: var(--muted); font-size: .85rem; margin-bottom: 12px; }
+    .detail-price { font-size: 1.5rem; font-weight: 800; color: var(--deep); margin-bottom: 14px; }
+    .detail-section { margin-bottom: 14px; }
+    .detail-section h4 { font-size: .8rem; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 6px; }
+    .detail-section ul { list-style: none; padding: 0; }
+    .detail-section ul li { padding: 3px 0; font-size: .9rem; }
+    .detail-section ul li::before { content: "✦ "; color: var(--pink); }
+    .presale-notice {
+      background: #fff0f5; border: 1.5px solid var(--pink); border-radius: 10px;
+      padding: 10px 14px; font-size: .82rem; color: var(--text); margin-bottom: 14px;
+    }
+    .qty-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .qty-btn { background: var(--light); border: 2px solid var(--pink); color: var(--deep); font-weight: 800; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+    .qty-num { font-weight: 800; font-size: 1.1rem; color: var(--text); }
+    .big-add-btn {
+      padding: 12px 28px; background: var(--deep); color: white; border: none; cursor: pointer;
+      border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+      transition: background .2s;
+    }
+    .big-add-btn:hover { background: #e05590; }
+
+    /* ── CART PANEL ── */
+    #cart-panel {
+      display: none; position: fixed; top: 0; right: 0; width: min(380px, 100vw); height: 100vh;
+      background: white; box-shadow: -4px 0 24px var(--shadow); z-index: 300;
+      flex-direction: column; overflow: hidden;
+    }
+    #cart-panel.open { display: flex; }
+    .cart-header {
+      padding: 20px; border-bottom: 2px solid var(--pink);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cart-header h3 { font-family: 'Nunito', sans-serif; font-size: 1.2rem; color: var(--deep); }
+    .close-cart { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); }
+    .cart-items { flex: 1; overflow-y: auto; padding: 16px; }
+    .cart-item { display: flex; gap: 10px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #fce4ee; }
+    .cart-item-img { width: 52px; height: 52px; border-radius: 8px; background: var(--light); object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; overflow: hidden; }
+    .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .cart-item-sub { font-size: .75rem; color: var(--muted); }
+    .cart-item-price { font-weight: 800; color: var(--deep); font-size: .9rem; }
+    .cart-item-remove { background: none; border: none; cursor: pointer; color: #ccc; font-size: 1rem; padding: 0 4px; }
+    .cart-item-remove:hover { color: var(--deep); }
+    .cart-footer { padding: 16px; border-top: 2px solid var(--pink); }
+    .cart-total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; color: var(--text); margin-bottom: 14px; }
+    .checkout-btn {
+      width: 100%; padding: 13px; background: var(--deep); color: white; border: none; cursor: pointer;
+      border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+      transition: background .2s;
+    }
+    .checkout-btn:hover { background: #e05590; }
+    .empty-cart { text-align: center; padding: 40px 0; color: var(--muted); }
+
+    /* ── CHECKOUT PAGE ── */
+    #page-checkout { display: none; max-width: 700px; }
+    #page-checkout.active { display: block; }
+    .form-card {
+      background: white; border-radius: 16px; padding: 24px;
+      box-shadow: 0 2px 12px var(--shadow); margin-bottom: 20px;
+      border: 1.5px solid #fce4ee;
+    }
+    .form-card h3 { font-family: 'Nunito', sans-serif; color: var(--deep); margin-bottom: 16px; font-size: 1.15rem; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: .8rem; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #fce4ee; border-radius: 10px;
+      font-family: 'Nunito', sans-serif; font-size: .92rem; color: var(--text); background: var(--light);
+      outline: none; transition: border-color .2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--pink); }
+    .shipping-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ship-opt {
+      border: 2px solid #fce4ee; border-radius: 10px; padding: 10px 12px; cursor: pointer;
+      transition: border-color .2s, background .2s; background: white;
+    }
+    .ship-opt.selected { border-color: var(--deep); background: #fff0f5; }
+    .ship-opt-name { font-weight: 700; font-size: .88rem; color: var(--text); }
+    .ship-opt-desc { font-size: .73rem; color: var(--muted); }
+    .ig-notice {
+      background: #fff8fb; border: 1.5px dashed var(--pink); border-radius: 10px;
+      padding: 12px 16px; font-size: .85rem; color: var(--text); margin-bottom: 20px; display: flex; gap: 8px; align-items: flex-start;
+    }
+    .ig-notice .icon { font-size: 1.2rem; flex-shrink: 0; }
+    .place-order-btn {
+      width: 100%; padding: 14px; background: var(--deep); color: white; border: none; cursor: pointer;
+      border-radius: 14px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.05rem;
+      transition: background .2s; letter-spacing: .4px;
+    }
+    .place-order-btn:hover { background: #e05590; }
+
+    /* ── ORDER CONFIRMATION ── */
+    #page-confirm { display: none; max-width: 680px; }
+    #page-confirm.active { display: block; }
+    .confirm-hero { text-align: center; margin-bottom: 28px; }
+    .confirm-hero .big-icon { font-size: 3.5rem; }
+    .confirm-hero h2 { font-family: 'Nunito', sans-serif; font-size: 1.5rem; color: var(--deep); margin: 10px 0 4px; }
+    .confirm-hero p { color: var(--muted); font-size: .9rem; }
+    .payment-box {
+      background: white; border-radius: 16px; padding: 22px;
+      box-shadow: 0 2px 12px var(--shadow); border: 1.5px solid var(--pink); margin-bottom: 18px;
+    }
+    .payment-box h3 { font-family: 'Nunito', sans-serif; color: var(--deep); margin-bottom: 14px; }
+    .payment-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .ptab {
+      flex: 1; padding: 8px; border: 2px solid #fce4ee; border-radius: 8px; cursor: pointer;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .82rem; color: var(--muted); background: white;
+      transition: all .2s;
+    }
+    .ptab.active { border-color: var(--deep); background: #fff0f5; color: var(--deep); }
+    .payment-detail { font-size: .9rem; color: var(--text); }
+    .payment-detail table { width: 100%; border-collapse: collapse; }
+    .payment-detail td { padding: 5px 0; }
+    .payment-detail td:first-child { font-weight: 700; color: var(--muted); font-size: .8rem; width: 140px; }
+    .mp-notice { background: var(--light); border-radius: 8px; padding: 10px 12px; font-size: .83rem; color: var(--muted); margin-top: 8px; }
+    .order-summary-confirm { font-size: .88rem; color: var(--text); }
+    .order-summary-confirm tr td { padding: 4px 0; }
+    .order-summary-confirm td:last-child { font-weight: 700; text-align: right; }
+
+    /* ── TRACKING PAGE ── */
+    .tracking-form { max-width: 420px; margin: 0 auto 32px; }
+    .track-input-row { display: flex; gap: 10px; }
+    .track-input-row input {
+      flex: 1; padding: 11px 14px; border: 2px solid var(--pink); border-radius: 10px;
+      font-family: 'Nunito', sans-serif; font-size: .95rem; color: var(--text); background: white; outline: none;
+    }
+    .track-btn {
+      padding: 11px 20px; background: var(--deep); color: white; border: none; cursor: pointer;
+      border-radius: 10px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .9rem;
+      transition: background .2s;
+    }
+    .track-btn:hover { background: #e05590; }
+    .order-card {
+      background: white; border-radius: 16px; padding: 22px;
+      box-shadow: 0 2px 12px var(--shadow); margin-bottom: 18px; border: 1.5px solid #fce4ee;
+    }
+    .order-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .order-id { font-size: .75rem; color: var(--muted); font-weight: 700; letter-spacing: .5px; }
+    .status-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+    }
+    .status-pending { background: #fff3cd; color: #b77a00; }
+    .status-confirmed { background: #d4edda; color: #1a6b35; }
+    .status-shipped { background: #cce5ff; color: #0056b3; }
+    .status-delivered { background: #e2d9f3; color: #5b2d90; }
+    .order-items-list { margin-bottom: 12px; }
+    .order-item-row { display: flex; justify-content: space-between; font-size: .88rem; padding: 3px 0; border-bottom: 1px solid #fce4ee; }
+    .order-total-row { display: flex; justify-content: space-between; font-weight: 800; font-size: .95rem; color: var(--deep); padding-top: 8px; }
+    .order-addr { font-size: .82rem; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid #fce4ee; }
+    .no-orders { text-align: center; padding: 40px; color: var(--muted); }
+
+    /* ── FOOTER ── */
+    footer { background: white; border-top: 2px solid var(--pink); margin-top: 40px; }
+    .footer-contact {
+      display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+      padding: 18px 16px 10px; border-bottom: 1px solid #fce4ee;
+    }
+    .contact-link {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--deep); font-weight: 700; font-size: .88rem; text-decoration: none;
+      transition: color .2s;
+    }
+    .contact-link:hover { color: var(--muted); }
+    .toc-toggle {
+      width: 100%; background: none; border: none; cursor: pointer;
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .85rem;
+      color: var(--muted); padding: 12px 16px; text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: color .2s;
+    }
+    .toc-toggle:hover { color: var(--deep); }
+    .toc-content {
+      display: none; padding: 16px 24px 20px; max-width: 720px; margin: 0 auto;
+      font-size: .83rem; color: var(--text); line-height: 1.7;
+    }
+    .toc-content.open { display: block; }
+    .toc-content h4 { color: var(--deep); margin: 12px 0 4px; font-size: .88rem; }
+    .footer-copy { text-align: center; font-size: .75rem; color: var(--muted); padding: 12px 0 16px; }
+
+    /* ── OVERLAY ── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(90,45,66,.18); z-index: 299;
+    }
+    .overlay.open { display: block; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--deep); color: white; padding: 10px 22px; border-radius: 20px;
+      font-weight: 700; font-size: .88rem; opacity: 0; transition: all .3s; pointer-events: none; z-index: 400;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 500px) {
+      .shipping-options { grid-template-columns: 1fr; }
+      .detail-layout { flex-direction: column; }
+      .detail-img { width: 100%; }
+      .footer-contact { gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-title-wrap">
+    <div class="store-name">Base Line Store</div>
+    <div class="store-kpop">k-pop store</div>
+  </div>
+  <div class="store-sub">Tienda K-pop, Chile.</div>
+  <nav>
+    <button class="active" onclick="showPage('albums')">Álbumes</button>
+    <button onclick="showPage('photocards')">Photocards</button>
+    <button onclick="showPage('tracking')">Seguimiento Pedido</button>
+  </nav>
+</header>
+
+<!-- CART BUTTON -->
+<button class="cart-btn" onclick="toggleCart()" id="cart-btn-wrap">
+  🛒
+  <span class="cart-count" id="cart-count" style="display:none">0</span>
+</button>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="toggleCart()"></div>
+
+<!-- CART PANEL -->
+<div id="cart-panel">
+  <div class="cart-header">
+    <h3>💕 Tu Carrito</h3>
+    <button class="close-cart" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <span id="cart-total-price">$0</span>
+    </div>
+    <button class="checkout-btn" onclick="goToCheckout()">Proceder al pago ✨</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ALBUMS PAGE -->
+<div class="page active" id="page-albums">
+  <div class="section-title">✦ Álbumes</div>
+  <div class="products-grid" id="grid-albums"></div>
+</div>
+
+<!-- PHOTOCARDS PAGE -->
+<div class="page" id="page-photocards">
+  <div class="section-title">✦ Photocards</div>
+  <div class="products-grid" id="grid-photocards"></div>
+</div>
+
+<!-- PRODUCT DETAIL PAGE -->
+<div class="page" id="page-detail">
+  <button class="back-btn" onclick="goBack()">← Volver</button>
+  <div id="detail-content"></div>
+</div>
+
+<!-- CHECKOUT PAGE -->
+<div class="page" id="page-checkout">
+  <button class="back-btn" onclick="showPage(lastPage || 'albums')">← Volver al catálogo</button>
+  <div class="ig-notice">
+    <span class="icon">📸</span>
+    <span><strong>¿Cómo reviso mi pedido?</strong> Al finalizar tu compra, podrás hacer seguimiento usando tu usuario de Instagram en la sección <em>Seguimiento Pedido</em>.</span>
+  </div>
+  <div class="form-card">
+    <h3>✦ Datos de contacto</h3>
+    <div class="field"><label>Usuario de Instagram <span style="color:var(--deep)">*</span></label><input type="text" id="f-ig" placeholder="@tu_usuario" /></div>
+    <div class="field"><label>Correo electrónico <span style="color:var(--deep)">*</span></label><input type="email" id="f-email" placeholder="correo@ejemplo.com" /></div>
+  </div>
+
+  <div class="form-card" id="ship-card">
+    <h3>✦ Método de envío</h3>
+    <div class="shipping-options" id="ship-opts">
+      <div class="ship-opt" onclick="selectShipping('starken-pp')" id="ship-starken-pp">
+        <div class="ship-opt-name">📦 Starken (Por pagar)</div>
+        <div class="ship-opt-desc">El flete se paga al recibir</div>
+      </div>
+      <div class="ship-opt" onclick="selectShipping('starken-pg')" id="ship-starken-pg">
+        <div class="ship-opt-name">📦 Starken (Pagado)</div>
+        <div class="ship-opt-desc">Envío incluido</div>
+      </div>
+      <div class="ship-opt" onclick="selectShipping('blue-pp')" id="ship-blue-pp">
+        <div class="ship-opt-name">🚚 Bluexpress (Por pagar)</div>
+        <div class="ship-opt-desc">El flete se paga al recibir</div>
+      </div>
+      <div class="ship-opt" onclick="selectShipping('blue-pg')" id="ship-blue-pg">
+        <div class="ship-opt-name">🚚 Bluexpress (Pagado)</div>
+        <div class="ship-opt-desc">Envío incluido</div>
+      </div>
+      <div class="ship-opt" onclick="selectShipping('presencial')" id="ship-presencial">
+        <div class="ship-opt-name">🤝 Entrega presencial</div>
+        <div class="ship-opt-desc">Temuco · Se coordina por WhatsApp</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card" id="addr-card" style="display:none">
+    <h3 id="addr-title">✦ Datos de envío</h3>
+    <div id="addr-fields"></div>
+  </div>
+
+  <div class="form-card">
+    <h3>✦ Nombre de quien transfiere</h3>
+    <div class="field"><label>Nombre completo</label><input type="text" id="f-payer" placeholder="Nombre de quien realizará la transferencia" /></div>
+  </div>
+
+  <div class="form-card">
+    <h3>✦ Método de pago</h3>
+    <div class="shipping-options" style="grid-template-columns:1fr 1fr">
+      <div class="ship-opt" onclick="selectPayment('transfer')" id="pay-opt-transfer">
+        <div class="ship-opt-name">🏦 Transferencia bancaria</div>
+        <div class="ship-opt-desc">Los datos aparecen al confirmar</div>
+      </div>
+      <div class="ship-opt" onclick="selectPayment('mp')" id="pay-opt-mp">
+        <div class="ship-opt-name">💚 Mercado Pago</div>
+        <div class="ship-opt-desc">Link al correo · incluye comisión + IVA</div>
+      </div>
+    </div>
+    <div id="mp-cuotas-wrap" style="display:none;margin-top:14px">
+      <div class="mp-notice">💚 Pago con hasta <strong>6 cuotas sin interés</strong>. El monto enviado al link de pago incluirá la comisión de Mercado Pago + IVA.</div>
+    </div>
+  </div>
+
+  <div class="form-card" id="checkout-summary">
+    <h3>✦ Resumen de tu pedido</h3>
+    <div id="checkout-items-list"></div>
+  </div>
+
+  <button class="place-order-btn" onclick="placeOrder()">Realizar pedido ✨</button>
+</div>
+
+<!-- CONFIRMATION PAGE -->
+<div class="page" id="page-confirm">
+  <div class="confirm-hero">
+    <div class="big-icon">💕</div>
+    <h2>¡Pedido realizado!</h2>
+    <p id="confirm-order-id">Orden #0000</p>
+  </div>
+
+  <div class="payment-box">
+    <h3>✦ Datos de pago</h3>
+    <div class="payment-tabs">
+      <button class="ptab active" onclick="showPayTab('transfer')">🏦 Transferencia</button>
+      <button class="ptab" onclick="showPayTab('mp')">💚 Mercado Pago</button>
+    </div>
+    <div id="pay-transfer" class="payment-detail">
+      <table>
+        <tr><td>Banco</td><td>Banco Estado</td></tr>
+        <tr><td>Tipo de cuenta</td><td>Cuenta Rut</td></tr>
+        <tr><td>N° cuenta / RUT</td><td>XXXXXXXXX-X</td></tr>
+        <tr><td>Nombre</td><td>Nombre Titular</td></tr>
+        <tr><td>Correo</td><td>tienda@baseline.cl</td></tr>
+        <tr><td>Monto a transferir</td><td id="transfer-amount" style="color:var(--deep);font-weight:800">$0</td></tr>
+      </table>
+      <div class="mp-notice" style="margin-top:10px">📌 Envía el comprobante a nuestro Instagram o correo. Tu pedido se confirmará una vez recibido el pago.</div>
+    </div>
+    <div id="pay-mp" class="payment-detail" style="display:none">
+      <div class="mp-notice">💚 Te enviaremos el link de pago a <strong id="mp-email"></strong>. El monto incluye comisión MP (6 cuotas sin interés) + IVA.</div>
+      <span id="mp-amount" style="display:none"></span>
+      <div class="mp-notice" style="margin-top:8px">📌 El link te llegará en pocos minutos. Revisa también tu carpeta de spam.</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>✦ Resumen del pedido</h3>
+    <div id="confirm-order-detail"></div>
+  </div>
+
+  <div class="form-card">
+    <h3>✦ Dirección / Envío</h3>
+    <div id="confirm-addr-detail" style="font-size:.88rem;line-height:1.8"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px">
+    <button onclick="showPage('tracking')" style="background:none;border:2px solid var(--pink);color:var(--deep);padding:10px 22px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;font-size:.9rem;">
+      📦 Seguir mi pedido
+    </button>
+  </div>
+</div>
+
+<!-- TRACKING PAGE -->
+<div class="page" id="page-tracking">
+  <div class="section-title">✦ Seguimiento de Pedido</div>
+  <div class="ig-notice">
+    <span class="icon">📸</span>
+    <span>Ingresa tu usuario de Instagram para ver el estado de tu(s) pedido(s).</span>
+  </div>
+  <div class="tracking-form">
+    <div class="track-input-row">
+      <input type="text" id="track-ig" placeholder="@tu_usuario_de_instagram" />
+      <button class="track-btn" onclick="trackOrder()">Buscar</button>
+    </div>
+  </div>
+  <div id="tracking-results"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-contact">
+    <a class="contact-link" href="https://instagram.com/baselinestore" target="_blank">
+      📸 @baselinestore
+    </a>
+    <a class="contact-link" href="https://wa.me/56912345678" target="_blank">
+      💬 WhatsApp
+    </a>
+    <a class="contact-link" href="mailto:tienda@baseline.cl">
+      ✉️ tienda@baseline.cl
+    </a>
+  </div>
+  <button class="toc-toggle" onclick="toggleToc()">
+    <span id="toc-arrow">▸</span> Términos y Condiciones
+  </button>
+  <div class="toc-content" id="toc-content">
+    <h4>1. Preventa</h4>
+    <p>Los productos en preventa tienen un plazo estimado de entrega de <strong>2 a 4 semanas</strong> después de la fecha oficial de lanzamiento del álbum/producto, tiempo necesario para su llegada a Chile. Posterior a esa fecha se coordinará el respectivo despacho o entrega.</p>
+    <h4>2. Pago</h4>
+    <p>El pedido se confirma una vez recibido el pago. Los métodos disponibles son transferencia bancaria y Mercado Pago. El link de MP se envía por correo electrónico y el monto incluye la comisión de Mercado Pago + IVA vigente. Para transferencia, los datos aparecen al completar el pedido.</p>
+    <h4>3. Envíos</h4>
+    <p>Se despacha por Starken y Bluexpress. El tipo de envío (por pagar o pagado) se selecciona al momento del pedido. La entrega presencial se realiza en Temuco y se coordina a través de un grupo de WhatsApp.</p>
+    <h4>4. Seguimiento</h4>
+    <p>Puedes revisar el estado de tu pedido en la sección <em>Seguimiento Pedido</em> usando tu usuario de Instagram con el que realizaste la compra.</p>
+    <h4>5. Cambios y devoluciones</h4>
+    <p>No se aceptan cambios ni devoluciones en productos de importación salvo que lleguen con defecto de fábrica visible. Cualquier reclamo debe ser informado dentro de las 48 hrs posteriores a la recepción del paquete.</p>
+    <h4>6. Contacto</h4>
+    <p>Para cualquier consulta o reclamo, contáctanos por Instagram, WhatsApp o correo indicados abajo.</p>
+  </div>
+  <div class="footer-copy">© 2025 Base Line Store · Tienda K-pop, Chile 💕</div>
+</footer>
+
+<script>
+// ─── PRODUCT DATA ───────────────────────────────────────────────────────
+const PRODUCTS = [
+  {
+    id: 'alb-001', category: 'albums',
+    artist: 'BTS', name: 'MOTS: ON (Map of the Soul)', price: 28900,
+    presale: false, launchDate: '2020-02-21',
+    emoji: '💿',
+    image: '', // Admin: Reemplaza con URL de imagen ej. "img/album1.jpg"
+    tracks: ['Intro: Persona','Boy With Luv','Mikrokosmos','Airplane pt.2','Jamais Vu','Dionysus'],
+    inclusions: ['Álbum físico','Postcard set','Mini poster','Photo book 32p','Unit photo card'],
+    benefits: [],
+  },
+  {
+    id: 'alb-002', category: 'albums',
+    artist: 'STRAY KIDS', name: 'ATE', price: 32500,
+    presale: true, launchDate: '2024-07-19',
+    emoji: '🎵',
+    image: '',
+    tracks: ['Chk Chk Boom','Walkin On Water','Runners High','Stray Kids'],
+    inclusions: ['CD','Booklet 64p','Photocard (1 aleatoria)','Lyric book','Sticker pack'],
+    benefits: ['Photocard firmada por sorteo','Acceso a pre-sale fansign'],
+  },
+  {
+    id: 'alb-003', category: 'albums',
+    artist: 'AESPA', name: 'Armageddon', price: 27900,
+    presale: false, launchDate: '2024-05-27',
+    emoji: '🌌',
+    image: '',
+    tracks: ['Supernova','Armageddon','Long Chat','Hot Mess','Run'],
+    inclusions: ['Álbum','Photocard','Póster (random)','Booklet'],
+    benefits: [],
+  },
+  {
+    id: 'pc-001', category: 'photocards',
+    artist: 'BTS', name: 'Set Photocards Butter (7un)', price: 9900,
+    presale: false, launchDate: '2021-05-21',
+    emoji: '🃏',
+    image: '',
+    tracks: [], inclusions: ['7 photocards laminadas','Packaging sellado'], benefits: [],
+  },
+  {
+    id: 'pc-002', category: 'photocards',
+    artist: 'STRAY KIDS', name: 'Photocard Hyunjin – ATE', price: 6900,
+    presale: true, launchDate: '2024-07-19',
+    emoji: '💖',
+    image: '',
+    tracks: [], inclusions: ['1 photocard individual','Manga protectora'], benefits: ['Firmada en sorteo'],
+  },
+  {
+    id: 'pc-003', category: 'photocards',
+    artist: 'BLACKPINK', name: 'Born Pink Photocards (4un)', price: 8500,
+    presale: false, launchDate: '2022-09-16',
+    emoji: '🌹',
+    image: '',
+    tracks: [], inclusions: ['4 photocards','1 por integrante'], benefits: [],
+  },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────
+let cart = JSON.parse(localStorage.getItem('bls_cart') || '[]');
+let currentPage = 'albums';
+let lastPage = 'albums';
+let selectedShipping = null;
+let selectedPayment = null;
+let cartOpen = false;
+
+// Load orders from localStorage (GitHub Pages: real app should use a backend/Supabase)
+function getOrders() { return JSON.parse(localStorage.getItem('bls_orders') || '[]'); }
+function saveOrders(o) { localStorage.setItem('bls_orders', JSON.stringify(o)); }
+function saveCart() { localStorage.setItem('bls_cart', JSON.stringify(cart)); }
+
+// ─── RENDER CATALOG ───────────────────────────────────────────────────────
+function renderGrid(category) {
+  const grid = document.getElementById(`grid-${category}`);
+  const items = PRODUCTS.filter(p => p.category === category);
+  grid.innerHTML = items.map(p => `
+    <div class="product-card" onclick="showDetail('${p.id}')">
+      <div class="product-img">
+        ${p.image ? `<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.innerHTML='${p.emoji}'" />` : p.emoji}
+      </div>
+      <div class="product-info">
+        <div class="product-artist">${p.artist}</div>
+        <div class="product-name">${p.name}${p.presale ? '<span class="presale-badge">Preventa</span>' : ''}</div>
+        <div class="product-price">${formatPrice(p.price)}</div>
+        <button class="add-cart-btn" onclick="event.stopPropagation(); quickAdd('${p.id}')">+ Agregar al carrito</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── PRODUCT DETAIL ───────────────────────────────────────────────────────
+function showDetail(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  lastPage = currentPage;
+  currentPage = 'detail';
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-detail').classList.add('active');
+
+  const presaleHTML = p.presale ? `
+    <div class="presale-notice">
+      ✨ <strong>Preventa</strong> · Lanzamiento: ${formatDate(p.launchDate)}<br>
+      Plazo estimado de llegada a Chile: <strong>2 a 4 semanas</strong> después del lanzamiento.
+    </div>` : '';
+
+  const tracksHTML = p.tracks.length ? `
+    <div class="detail-section">
+      <h4>Tracklist</h4>
+      <ul>${p.tracks.map((t,i) => `<li>${i+1}. ${t}</li>`).join('')}</ul>
+    </div>` : '';
+
+  const inclusionsHTML = `
+    <div class="detail-section">
+      <h4>Inclusiones</h4>
+      <ul>${p.inclusions.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>`;
+
+  const benefitsHTML = p.benefits.length ? `
+    <div class="detail-section">
+      <h4>Beneficios de preventa</h4>
+      <ul>${p.benefits.map(b => `<li>${b}</li>`).join('')}</ul>
+    </div>` : '';
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-layout">
+      <div class="detail-img">
+        ${p.image ? `<img src="${p.image}" alt="${p.name}" onerror="this.innerHTML='${p.emoji}'" />` : p.emoji}
+      </div>
+      <div class="detail-info">
+        <div style="font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px">${p.artist}</div>
+        <h2>${p.name}${p.presale ? '<span class="presale-badge">Preventa</span>' : ''}</h2>
+        <div class="detail-meta">Lanzamiento: ${formatDate(p.launchDate)}</div>
+        <div class="detail-price">${formatPrice(p.price)}</div>
+        ${presaleHTML}
+        ${tracksHTML}
+        ${inclusionsHTML}
+        ${benefitsHTML}
+        <div class="qty-row">
+          <button class="qty-btn" onclick="changeQty(-1, '${p.id}')">−</button>
+          <span class="qty-num" id="detail-qty">1</span>
+          <button class="qty-btn" onclick="changeQty(1, '${p.id}')">+</button>
+        </div>
+        <button class="big-add-btn" onclick="addFromDetail('${p.id}')">🛒 Agregar al carrito</button>
+      </div>
+    </div>`;
+}
+let detailQty = 1;
+function changeQty(d, id) {
+  detailQty = Math.max(1, (detailQty||1) + d);
+  document.getElementById('detail-qty').textContent = detailQty;
+}
+function addFromDetail(id) {
+  for (let i = 0; i < (detailQty||1); i++) addToCart(id);
+  detailQty = 1;
+  if (document.getElementById('detail-qty')) document.getElementById('detail-qty').textContent = 1;
+  showToast('¡Agregado al carrito! 💕');
+}
+
+function goBack() {
+  showPage(lastPage || 'albums');
+}
+
+// ─── CART ───────────────────────────────────────────────────────────────
+function addToCart(id) {
+  const existing = cart.find(i => i.id === id);
+  if (existing) existing.qty++;
+  else {
+    const p = PRODUCTS.find(x => x.id === id);
+    if (p) cart.push({ id, qty: 1 });
+  }
+  saveCart();
+  updateCartUI();
+}
+function quickAdd(id) { addToCart(id); showToast('¡Agregado al carrito! 💕'); }
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  saveCart(); updateCartUI();
+}
+function updateCartUI() {
+  const total = cart.reduce((s, i) => s + i.qty, 0);
+  const count = document.getElementById('cart-count');
+  count.textContent = total;
+  count.style.display = total > 0 ? 'flex' : 'none';
+  renderCartItems();
+}
+function renderCartItems() {
+  const list = document.getElementById('cart-items-list');
+  if (!cart.length) { list.innerHTML = '<div class="empty-cart">🛍️<br>Tu carrito está vacío</div>'; document.getElementById('cart-total-price').textContent = '$0'; return; }
+  list.innerHTML = cart.map(i => {
+    const p = PRODUCTS.find(x => x.id === i.id);
+    if (!p) return '';
+    return `<div class="cart-item">
+      <div class="cart-item-img">${p.image ? `<img src="${p.image}" onerror="this.parentElement.innerHTML='${p.emoji}'" />` : p.emoji}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${p.name}</div>
+        <div class="cart-item-sub">${p.artist} · x${i.qty}</div>
+        <div class="cart-item-price">${formatPrice(p.price * i.qty)}</div>
+      </div>
+      <button class="cart-item-remove" onclick="removeFromCart('${i.id}')">✕</button>
+    </div>`;
+  }).join('');
+  const total = cart.reduce((s, i) => { const p = PRODUCTS.find(x => x.id === i.id); return s + (p ? p.price * i.qty : 0); }, 0);
+  document.getElementById('cart-total-price').textContent = formatPrice(total);
+}
+function toggleCart() {
+  cartOpen = !cartOpen;
+  document.getElementById('cart-panel').classList.toggle('open', cartOpen);
+  document.getElementById('overlay').classList.toggle('open', cartOpen);
+}
+
+// ─── CHECKOUT ───────────────────────────────────────────────────────────
+function goToCheckout() {
+  if (!cart.length) { showToast('Tu carrito está vacío'); return; }
+  toggleCart();
+  showPage('checkout');
+  renderCheckoutSummary();
+}
+function renderCheckoutSummary() {
+  const container = document.getElementById('checkout-items-list');
+  let html = '<table style="width:100%;font-size:.88rem"><tbody>';
+  let total = 0;
+  cart.forEach(i => {
+    const p = PRODUCTS.find(x => x.id === i.id);
+    if (!p) return;
+    const sub = p.price * i.qty;
+    total += sub;
+    html += `<tr><td>${p.name} x${i.qty}</td><td style="text-align:right;font-weight:700">${formatPrice(sub)}</td></tr>`;
+  });
+  html += `</tbody><tfoot><tr><td style="padding-top:10px;font-weight:800;color:var(--deep)">Total</td><td style="text-align:right;font-weight:800;color:var(--deep);padding-top:10px">${formatPrice(total)}</td></tr></tfoot></table>`;
+  container.innerHTML = html;
+}
+
+function selectShipping(type) {
+  selectedShipping = type;
+  document.querySelectorAll('.ship-opt').forEach(el => el.classList.remove('selected'));
+  document.getElementById(`ship-${type}`).classList.add('selected');
+  showAddressFields(type);
+}
+
+function selectPayment(method) {
+  selectedPayment = method;
+  document.querySelectorAll('[id^="pay-opt-"]').forEach(el => el.classList.remove('selected'));
+  document.getElementById('pay-opt-' + method).classList.add('selected');
+  document.getElementById('mp-cuotas-wrap').style.display = method === 'mp' ? 'block' : 'none';
+}
+
+function showAddressFields(type) {
+  const card = document.getElementById('addr-card');
+  const title = document.getElementById('addr-title');
+  const fields = document.getElementById('addr-fields');
+  card.style.display = 'block';
+
+  if (type === 'presencial') {
+    title.textContent = '✦ Datos para entrega presencial';
+    fields.innerHTML = `
+      <div class="field"><label>Nombre completo</label><input type="text" id="f-name" placeholder="Tu nombre" /></div>
+      <div class="field"><label>Número de teléfono</label><input type="tel" id="f-phone" placeholder="+56 9 XXXX XXXX" /></div>
+      <p style="font-size:.82rem;color:var(--muted);margin-top:6px">📱 La entrega se coordinará a través de un grupo de WhatsApp.</p>`;
+  } else {
+    const isBlue = type.startsWith('blue');
+    const carrier = isBlue ? 'Bluexpress' : 'Starken';
+    const label = isBlue ? 'Punto Blue / Agencia' : 'Agencia Starken';
+    title.textContent = `✦ Datos de envío – ${carrier}`;
+    fields.innerHTML = `
+      <div class="field"><label>Nombre completo</label><input type="text" id="f-name" placeholder="Nombre completo" /></div>
+      <div class="field"><label>RUT</label><input type="text" id="f-rut" placeholder="12.345.678-9" /></div>
+      <div class="field"><label>Teléfono</label><input type="tel" id="f-phone" placeholder="+56 9 XXXX XXXX" /></div>
+      <div class="field">
+        <label>¿Envío a domicilio o sucursal?</label>
+        <select id="f-addr-type" onchange="toggleAddrType()">
+          <option value="">Selecciona</option>
+          <option value="domicilio">Domicilio</option>
+          <option value="sucursal">Sucursal / ${label}</option>
+        </select>
+      </div>
+      <div id="f-addr-domicilio" style="display:none">
+        <div class="field"><label>Dirección</label><input type="text" id="f-address" placeholder="Calle 123, Depto 4" /></div>
+        <div class="field"><label>Región</label><input type="text" id="f-region" placeholder="Ej. La Araucanía" /></div>
+        <div class="field"><label>Comuna</label><input type="text" id="f-commune" placeholder="Ej. Temuco" /></div>
+      </div>
+      <div id="f-addr-sucursal" style="display:none">
+        <div class="field"><label>Nombre del punto / agencia</label><input type="text" id="f-branch" placeholder="Ej. Sucursal Temuco Centro" /></div>
+        <div class="field"><label>Región</label><input type="text" id="f-region" placeholder="Ej. La Araucanía" /></div>
+        <div class="field"><label>Comuna</label><input type="text" id="f-commune" placeholder="Ej. Temuco" /></div>
+      </div>`;
+  }
+}
+
+function toggleAddrType() {
+  const val = document.getElementById('f-addr-type')?.value;
+  const dom = document.getElementById('f-addr-domicilio');
+  const suc = document.getElementById('f-addr-sucursal');
+  if (dom) dom.style.display = val === 'domicilio' ? 'block' : 'none';
+  if (suc) suc.style.display = val === 'sucursal' ? 'block' : 'none';
+}
+
+function placeOrder() {
+  const ig = document.getElementById('f-ig')?.value.trim();
+  const email = document.getElementById('f-email')?.value.trim();
+  const payer = document.getElementById('f-payer')?.value.trim();
+  if (!ig) { showToast('Ingresa tu usuario de Instagram'); return; }
+  if (!email) { showToast('Ingresa tu correo electrónico'); return; }
+  if (!selectedShipping) { showToast('Selecciona un método de envío'); return; }
+  if (!payer) { showToast('Ingresa el nombre de quien transferirá'); return; }
+  if (!selectedPayment) { showToast('Selecciona un método de pago'); return; }
+
+  // Collect address
+  let addrObj = { type: selectedShipping };
+  if (selectedShipping === 'presencial') {
+    const name = document.getElementById('f-name')?.value.trim();
+    const phone = document.getElementById('f-phone')?.value.trim();
+    if (!name || !phone) { showToast('Completa los datos de entrega'); return; }
+    addrObj = { ...addrObj, name, phone };
+  } else {
+    const name = document.getElementById('f-name')?.value.trim();
+    const rut = document.getElementById('f-rut')?.value.trim();
+    const phone = document.getElementById('f-phone')?.value.trim();
+    const addrType = document.getElementById('f-addr-type')?.value;
+    const region = document.getElementById('f-region')?.value.trim();
+    const commune = document.getElementById('f-commune')?.value.trim();
+    if (!name || !rut || !phone || !addrType || !region || !commune) { showToast('Completa todos los datos de envío'); return; }
+    if (addrType === 'domicilio') {
+      const address = document.getElementById('f-address')?.value.trim();
+      if (!address) { showToast('Ingresa la dirección'); return; }
+      addrObj = { ...addrObj, name, rut, phone, addrType, address, region, commune };
+    } else {
+      const branch = document.getElementById('f-branch')?.value.trim();
+      if (!branch) { showToast('Ingresa el nombre de la sucursal/punto'); return; }
+      addrObj = { ...addrObj, name, rut, phone, addrType, branch, region, commune };
+    }
+  }
+
+  const total = cart.reduce((s, i) => { const p = PRODUCTS.find(x => x.id === i.id); return s + (p ? p.price * i.qty : 0); }, 0);
+  const mpTotal = Math.round(total * (1 + 0.0349) * 1.19); // 6 cuotas sin interés: 3,49% + IVA
+  const orderId = 'BLS-' + Date.now().toString().slice(-6);
+
+  const order = {
+    id: orderId, ig: ig.startsWith('@') ? ig : '@' + ig,
+    email, payer, shipping: addrObj,
+    items: cart.map(i => ({ ...i })),
+    total, mpTotal,
+    paymentMethod: selectedPayment,
+    status: 'Esperando pago',
+    date: new Date().toISOString(),
+  };
+
+  const orders = getOrders();
+  orders.push(order);
+  saveOrders(orders);
+  cart = []; saveCart(); updateCartUI();
+  selectedPayment = null;
+
+  // Show confirmation
+  showConfirmation(order);
+}
+
+function showConfirmation(order) {
+  showPage('confirm');
+  document.getElementById('confirm-order-id').textContent = `Orden ${order.id}`;
+  document.getElementById('transfer-amount').textContent = formatPrice(order.total);
+  document.getElementById('mp-amount').textContent = formatPrice(order.mpTotal);
+  document.getElementById('mp-email').textContent = order.email;
+  // Show the chosen payment method tab automatically
+  showPayTab(order.paymentMethod === 'mp' ? 'mp' : 'transfer');
+
+  // Items
+  let itemsHTML = '<table class="order-summary-confirm" style="width:100%"><tbody>';
+  order.items.forEach(i => {
+    const p = PRODUCTS.find(x => x.id === i.id);
+    if (p) itemsHTML += `<tr><td>${p.name} x${i.qty}</td><td>${formatPrice(p.price * i.qty)}</td></tr>`;
+  });
+  itemsHTML += `</tbody><tfoot><tr><td style="font-weight:800;color:var(--deep);padding-top:8px">Total</td><td style="font-weight:800;color:var(--deep);padding-top:8px">${formatPrice(order.total)}</td></tr></tfoot></table>`;
+  document.getElementById('confirm-order-detail').innerHTML = itemsHTML;
+
+  // Address
+  const s = order.shipping;
+  let addrHTML = '';
+  const labels = { 'starken-pp':'Starken (Por pagar)', 'starken-pg':'Starken (Pagado)', 'blue-pp':'Bluexpress (Por pagar)', 'blue-pg':'Bluexpress (Pagado)', 'presencial':'Entrega presencial – Temuco' };
+  addrHTML += `<strong>Método:</strong> ${labels[s.type] || s.type}<br>`;
+  if (s.type === 'presencial') {
+    addrHTML += `<strong>Nombre:</strong> ${s.name}<br><strong>Teléfono:</strong> ${s.phone}`;
+  } else {
+    addrHTML += `<strong>Nombre:</strong> ${s.name}<br><strong>RUT:</strong> ${s.rut}<br><strong>Teléfono:</strong> ${s.phone}<br>`;
+    if (s.addrType === 'domicilio') addrHTML += `<strong>Dirección:</strong> ${s.address}, ${s.commune}, ${s.region}`;
+    else addrHTML += `<strong>Punto / Agencia:</strong> ${s.branch}<br><strong>Región:</strong> ${s.region} – <strong>Comuna:</strong> ${s.commune}`;
+  }
+  document.getElementById('confirm-addr-detail').innerHTML = addrHTML;
+}
+
+function showPayTab(tab) {
+  document.getElementById('pay-transfer').style.display = tab === 'transfer' ? 'block' : 'none';
+  document.getElementById('pay-mp').style.display = tab === 'mp' ? 'block' : 'none';
+  document.querySelectorAll('.ptab').forEach((b, i) => b.classList.toggle('active', (i === 0 && tab === 'transfer') || (i === 1 && tab === 'mp')));
+}
+
+// ─── TRACKING ───────────────────────────────────────────────────────────
+function trackOrder() {
+  let ig = document.getElementById('track-ig').value.trim();
+  if (!ig) { showToast('Ingresa tu usuario de Instagram'); return; }
+  if (!ig.startsWith('@')) ig = '@' + ig;
+  const orders = getOrders().filter(o => o.ig.toLowerCase() === ig.toLowerCase());
+  const results = document.getElementById('tracking-results');
+  if (!orders.length) {
+    results.innerHTML = '<div class="no-orders">💕 No encontramos pedidos con ese usuario.<br><small>Verifica que sea el mismo que usaste al comprar.</small></div>';
+    return;
+  }
+  const labels = { 'starken-pp':'Starken (Por pagar)', 'starken-pg':'Starken (Pagado)', 'blue-pp':'Bluexpress (Por pagar)', 'blue-pg':'Bluexpress (Pagado)', 'presencial':'Entrega presencial – Temuco' };
+  const statusClass = { 'Esperando pago':'status-pending', 'Pago confirmado':'status-confirmed', 'En camino':'status-shipped', 'Entregado':'status-delivered' };
+  results.innerHTML = orders.map(o => {
+    let addrHTML = '';
+    const s = o.shipping;
+    addrHTML += `<strong>Envío:</strong> ${labels[s.type] || s.type} · `;
+    if (s.type === 'presencial') addrHTML += s.name;
+    else if (s.addrType === 'sucursal') addrHTML += `${s.branch}, ${s.commune}, ${s.region}`;
+    else addrHTML += `${s.address || ''}, ${s.commune}, ${s.region}`;
+
+    let itemsHTML = o.items.map(i => {
+      const p = PRODUCTS.find(x => x.id === i.id);
+      return p ? `<div class="order-item-row"><span>${p.name} x${i.qty}</span><span>${formatPrice(p.price * i.qty)}</span></div>` : '';
+    }).join('');
+
+    return `<div class="order-card">
+      <div class="order-card-header">
+        <div>
+          <div class="order-id">ORDEN ${o.id}</div>
+          <div style="font-size:.78rem;color:var(--muted)">${formatDateShort(o.date)}</div>
+        </div>
+        <span class="status-badge ${statusClass[o.status] || 'status-pending'}">${o.status}</span>
+      </div>
+      <div class="order-items-list">${itemsHTML}</div>
+      <div class="order-total-row"><span>Total pagado</span><span>${formatPrice(o.total)}</span></div>
+      <div class="order-addr">${addrHTML}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── PAGE NAVIGATION ────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  currentPage = name;
+  const navBtns = document.querySelectorAll('nav button');
+  navBtns.forEach(b => b.classList.remove('active'));
+  if (name === 'albums') navBtns[0].classList.add('active');
+  else if (name === 'photocards') navBtns[1].classList.add('active');
+  else if (name === 'tracking') navBtns[2].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ─── FOOTER ─────────────────────────────────────────────────────────────
+function toggleToc() {
+  const c = document.getElementById('toc-content');
+  const a = document.getElementById('toc-arrow');
+  c.classList.toggle('open');
+  a.textContent = c.classList.contains('open') ? '▾' : '▸';
+}
+
+// ─── HELPERS ────────────────────────────────────────────────────────────
+function formatPrice(n) { return '$' + n.toLocaleString('es-CL'); }
+function formatDate(d) { return new Date(d + 'T12:00:00').toLocaleDateString('es-CL', { day:'numeric', month:'long', year:'numeric' }); }
+function formatDateShort(d) { return new Date(d).toLocaleDateString('es-CL', { day:'2-digit', month:'2-digit', year:'numeric' }); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────
+renderGrid('albums');
+renderGrid('photocards');
+updateCartUI();
+</script>
+</body>
+</html>
